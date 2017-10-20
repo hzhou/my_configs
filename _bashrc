@@ -1,0 +1,13 @@
+export PS1="\u@\h \W$ ";
+export EDITOR=/usr/bin/vim
+
+export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
+
+PERL5LIB=$HOME/lib/perl5
+MYDEFLIB=$HOME/lib/MyDef
+MYDEFSRC=$HOME/projects/MyDef
+export PERL5LIB MYDEFLIB MYDEFSRC
+
+alias ls="ls --color=auto"
+alias grep='grep --color=auto'
+
