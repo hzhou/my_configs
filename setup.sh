@@ -9,7 +9,7 @@ git clone https://github.com/hzhou/MyDef
 cd MyDef
 sh bootstrap.sh
 
-for a in output_c output_java output_python output_tcl; do
+for a in output_c output_java output_python output_tcl output_glsl; do
     cd $HOME/projects
     git clone https://github.com/hzhou/$a
     cd $a
