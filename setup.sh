@@ -2,7 +2,7 @@ ln -s $HOME/projects/my_configs/_bashrc $HOME/.bashrc
 ln -s $HOME/projects/my_configs/_vimrc  $HOME/.vimrc
 ln -s $HOME/projects/my_configs/_vim  $HOME/.vim
 
-# source ~/.bashrc
+source $HOME/.bashrc
 
 cd $HOME/projects
 git clone https://github.com/hzhou/MyDef
