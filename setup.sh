@@ -17,6 +17,7 @@ MYDEFLIB=$HOME/lib/MyDef
 MYDEFSRC=$HOME/projects/MyDef
 
 PATH=$HOME/bin:$PATH
+export PERL5LIB MYDEFLIB MYDEFSRC PATH
 
 for a in output_c output_java output_python output_tcl output_glsl; do
     cd $HOME/projects
