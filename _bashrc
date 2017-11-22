@@ -1,6 +1,9 @@
 uname=`uname -s`
 
-export PS1="\W $ ";
+GREEN="\[\033[32m\]"
+RESET="\[\033[0m\]"
+export PS1="${GREEN}\u [\W]${RESET}$ "
+# export PS1="\W $ ";
 export EDITOR=/usr/bin/vim
 
 export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
