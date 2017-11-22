@@ -1,3 +1,5 @@
+uname=`uname -s`
+
 export PS1="\W $ ";
 export EDITOR=/usr/bin/vim
 
@@ -8,6 +10,10 @@ MYDEFLIB=$HOME/lib/MyDef
 MYDEFSRC=$HOME/projects/MyDef
 export PERL5LIB MYDEFLIB MYDEFSRC
 
-alias ls="ls --color=auto"
+if [[ "$uname" =~ Darwin ]]; then
+    alias ls="ls -G"
+else
+    alias ls="ls --color=auto"
+fi
 alias grep='grep --color=auto'
 
