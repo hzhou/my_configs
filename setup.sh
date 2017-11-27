@@ -1,5 +1,6 @@
 export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 uname=`uname -s`
+curdir=`pwd`
 
 mkdir -p $HOME/{bin,lib,projects}
 
@@ -52,6 +53,7 @@ else
     echo 'alias ls="ls --color=auto"' >$HOME/.bashrc
 fi
 if [[ "$uname" =~ CYGWIN ]]; then
+    cd $curdir
     mydef_run setup_cygwin.def
 fi
 
