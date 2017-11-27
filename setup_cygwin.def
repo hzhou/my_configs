@@ -23,6 +23,6 @@ subcode: probe(name, glob)
         chdir $p_dir or next
         my @all = glob("$(glob)*")
         $if @all
-            my $d = $all[-1]
+            my $d = $p_dir.$all[-1]
             BLOCK
             last
