@@ -1,4 +1,6 @@
-mkdir -p $HOME/projects
+PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
+
+mkdir -p $HOME/{bin,lib,projects}
 
 cp -v _bashrc $HOME/.bashrc
 cp -v _vimrc  $HOME/.vimrc
@@ -18,7 +20,6 @@ PERL5LIB=$HOME/lib/perl5
 MYDEFLIB=$HOME/lib/MyDef
 MYDEFSRC=$HOME/projects/MyDef
 
-PATH=$HOME/bin:$PATH
 export PERL5LIB MYDEFLIB MYDEFSRC PATH
 
 for a in output_c output_java output_python output_tcl output_glsl; do
