@@ -20,3 +20,7 @@ else
 fi
 alias grep='grep --color=auto'
 
+if [[ "$uname" =~ CYGWIN ]]; then
+    echo cygwin
+fi
+
