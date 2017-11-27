@@ -19,8 +19,9 @@ page: setup_cygwin
 
 subcode: probe(name, glob)
     $foreach $p in @plist
-        my $p_dir="/cygdrive/c/$p/$(name)/"
-        my @all = glob("$p_dir/$(glob)*")
+        my $p_dir="/cygdrive/c"."$p/$(name)/"
+        chdir $p_dir or next
+        my @all = glob("$(glob)*")
         $if @all
             my $d = $all[-1]
             BLOCK
