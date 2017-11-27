@@ -1,9 +1,9 @@
+export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 uname=`uname -s`
-PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 
 mkdir -p $HOME/{bin,lib,projects}
 
-cp -v _bashrc $HOME/.bashrc
+cp -fv _bashrc $HOME/.bashrc
 cp -v _vimrc  $HOME/.vimrc
 cp -rv _vim $HOME/.vim
 echo source .bashrc >$HOME/.bash_profile
@@ -22,7 +22,7 @@ PERL5LIB=$HOME/lib/perl5
 MYDEFLIB=$HOME/lib/MyDef
 MYDEFSRC=$HOME/projects/MyDef
 
-export PERL5LIB MYDEFLIB MYDEFSRC PATH
+export PERL5LIB MYDEFLIB MYDEFSRC
 
 for a in output_c output_java output_python ; do
     cd $HOME/projects
@@ -46,6 +46,11 @@ else
     git clone https://github.com/hzhou/teach_2017
 fi
 
+if [[ "$uname" =~ Darwin ]]; then
+    echo 'alias ls="ls -G"' >$HOME/.bashrc
+else
+    echo 'alias ls="ls --color=auto"' >$HOME/.bashrc
+fi
 if [[ "$uname" =~ CYGWIN ]]; then
     mydef_run setup_cygwin.def
 fi
