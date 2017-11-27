@@ -1,3 +1,5 @@
+mkdir -p $HOME/projects
+
 cp -v _bashrc $HOME/.bashrc
 cp -v _vimrc  $HOME/.vimrc
 cp -rv _vim $HOME/.vim
