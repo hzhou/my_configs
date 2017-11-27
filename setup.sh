@@ -24,7 +24,7 @@ MYDEFSRC=$HOME/projects/MyDef
 
 export PERL5LIB MYDEFLIB MYDEFSRC PATH
 
-for a in output_c output_java output_python output_tcl output_glsl; do
+for a in output_c output_java output_python ; do
     cd $HOME/projects
     if [ -d $a ]; then
         cd $a
