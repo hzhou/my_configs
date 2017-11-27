@@ -1,0 +1,28 @@
+page: setup_cygwin
+    module: perl
+
+    my $home = $ENV{HOME}
+    my $user
+    $if $home=~/\/home\/(\w+)/
+        $user=$1
+
+    my @plist=("/Program Files", "/Users/$user/AppData/Local/Programs")
+
+    $if !-f "$home/bin/javac"
+        $foreach $p in @plist
+            my $p_dir="/cygdrive/c/$p/Java/"
+            my @all = glob("$p_dir/jdk*")
+            $if @all
+                my $d = $all[-1]
+                system "ln -s \"$d/bin/javac\" $home/bin/"
+                system "ln -s \"$d/bin/java\" $home/bin/"
+
+    $if !-f "$home/bin/python"
+        $foreach $p in @plist
+            my $p_dir="/cygdrive/c/$p/Python/"
+            my @all = glob("$p_dir/Python*")
+            $if @all
+                my $d = $all[-1]
+                system "ln -s \"$d/python\" $home/bin/"
+
+

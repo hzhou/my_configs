@@ -1,3 +1,4 @@
+uname=`uname -s`
 PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 
 mkdir -p $HOME/{bin,lib,projects}
@@ -42,6 +43,10 @@ if [ -d teach_2017 ]; then
     git pull
 else
     git clone https://github.com/hzhou/teach_2017
+fi
+
+if [[ "$uname" =~ CYGWIN ]]; then
+    mydef_run setup_cygwin.def
 fi
 
 echo "RUN . ~/.bashrc"
