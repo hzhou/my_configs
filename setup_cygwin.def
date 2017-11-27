@@ -8,14 +8,17 @@ page: setup_cygwin
 
     my @plist=("/Program Files", "/Users/$user/AppData/Local/Programs")
 
-    $if !-f "$home/bin/javac"
+    $(if:1)
         &call probe, Java, jdk
             system "ln -sv \"$d/bin/javac\" $home/bin/"
             system "ln -sv \"$d/bin/java\" $home/bin/"
 
-    $if !-f "$home/bin/python"
+    $(if:1)
         &call probe, Python, Python
             system "ln -sv \"$d/python\" $home/bin/"
+            $if $d=~/Python3/
+                &call open_w, $home/lib/MyDef/python/_config.def
+                     print Out "macros:\n    PYTHON3: 1\n"
 
 subcode: probe(name, glob)
     $foreach $p in @plist
