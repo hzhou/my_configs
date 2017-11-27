@@ -48,9 +48,9 @@ else
 fi
 
 if [[ "$uname" =~ Darwin ]]; then
-    echo 'alias ls="ls -G"' >$HOME/.bashrc
+    echo 'alias ls="ls -G"' >>$HOME/.bashrc
 else
-    echo 'alias ls="ls --color=auto"' >$HOME/.bashrc
+    echo 'alias ls="ls --color=auto"' >>$HOME/.bashrc
 fi
 if [[ "$uname" =~ CYGWIN ]]; then
     cd $curdir
