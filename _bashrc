@@ -1,5 +1,3 @@
-uname=`uname -s`
-
 GREEN="\[\033[32m\]"
 RESET="\[\033[0m\]"
 export PS1="${GREEN}\u [\W]${RESET}$ "
@@ -12,6 +10,8 @@ PERL5LIB=$HOME/lib/perl5
 MYDEFLIB=$HOME/lib/MyDef
 MYDEFSRC=$HOME/projects/MyDef
 export PERL5LIB MYDEFLIB MYDEFSRC
+
+uname=`uname -s`
 
 if [[ "$uname" =~ Darwin ]]; then
     alias ls="ls -G"
