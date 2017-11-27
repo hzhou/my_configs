@@ -6,6 +6,7 @@ mkdir -p $HOME/{bin,lib,projects}
 cp -v _bashrc $HOME/.bashrc
 cp -v _vimrc  $HOME/.vimrc
 cp -rv _vim $HOME/.vim
+echo source .bashrc >$HOME/.bash_profile
 
 cd $HOME/projects
 if [ -d MyDef ]; then
