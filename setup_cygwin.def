@@ -13,10 +13,9 @@ page: setup_cygwin
             system "ln -sv \"$d/bin/javac\" $home/bin/"
             system "ln -sv \"$d/bin/java\" $home/bin/"
 
-    $(if:0)
-        $if !-f "$home/bin/python"
-            &call probe, Python, Python
-                system "ln -sv \"$d/python\" $home/bin/"
+    $if !-f "$home/bin/python"
+        &call probe, Python, Python
+            system "ln -sv \"$d/python\" $home/bin/"
 
 subcode: probe(name, glob)
     $foreach $p in @plist
