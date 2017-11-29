@@ -2,7 +2,9 @@ export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 uname=`uname -s`
 curdir=`pwd`
 
-mkdir -p $HOME/{bin,lib,projects}
+mkdir -p $HOME/bin
+mkdir -p $HOME/lib
+mkdir -p $HOME/projects
 
 cp -fv _bashrc $HOME/.bashrc
 cp -v _vimrc  $HOME/.vimrc
