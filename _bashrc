@@ -11,8 +11,4 @@ MYDEFLIB=$HOME/lib/MyDef
 MYDEFSRC=$HOME/projects/MyDef
 export PERL5LIB MYDEFLIB MYDEFSRC
 
-uname=`uname -s`
-
 alias grep='grep --color=auto'
-
-
