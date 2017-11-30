@@ -1,0 +1,5 @@
+# mkdir ~/.ssh/sockets
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
