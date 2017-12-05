@@ -1,4 +1,8 @@
 # need check make, vim, python3
+if ! make -v >/dev/null; then
+    echo make not installed!
+    exit
+fi
 
 export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 uname=`uname -a`
