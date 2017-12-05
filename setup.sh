@@ -1,7 +1,7 @@
 # need check make, vim, python3
 
 export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
-uname=`uname -s`
+uname=`uname -a`
 curdir=`pwd`
 
 mkdir -p $HOME/bin
@@ -56,9 +56,9 @@ if [[ "$uname" =~ Darwin ]]; then
 else
     echo 'alias ls="ls --color=auto"' >>$HOME/.bashrc
 fi
-if [[ "$uname" =~ CYGWIN ]]; then
+if [[ "$uname" =~ CYGWIN|Microsoft ]]; then
     cd $curdir
-    mydef_run setup_cygwin.def
+    mydef_run setup_windows.def
 fi
 
 echo "RUN . ~/.bashrc"

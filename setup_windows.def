@@ -1,0 +1,55 @@
+# * Install jdk -- jdk-9.0.1 376MB
+# * Install Python -- 3.6.3 web-based installer
+page: setup_windows
+    module: perl
+
+    $(if:1)
+        &call probe, Java, jdk
+            system "ln -sv \"$d/bin/javac\" $home/bin/"
+            system "ln -sv \"$d/bin/java\" $home/bin/"
+
+    $(if:1)
+        &call probe, Python, Python
+            system "ln -sv \"$d/python\" $home/bin/"
+            $if $d=~/Python3/
+                &call open_w, $home/lib/MyDef/python/_config.def
+                     print Out "macros:\n    PYTHON3: 1\n"
+
+subcode: _autoload
+    my $home = $ENV{HOME}
+
+    my $user
+    $if $home=~/\/home\/(\w+)/
+        $user=$1
+
+    my $C
+    $if -d "/cygdrive/c"
+        $C = "/cygdrive/c"
+    $elif -d "/mnt/c"
+        $C = "/mnt/c"
+    $else
+        die "Windows C:/ drive not found!\n"
+
+    my @plist
+    push @plist, "$C/Program Files"
+
+    my @all = glob("$C/Users/*")
+    $foreach $a in @all
+        $if $a=~/(Default| User|Public|desktop.ini)/
+            next
+        $elif -d "$a/AppData/Local/Programs"
+            push @plist, "$a/AppData/Local/Programs"
+
+    $print ProbeList:
+    $foreach $p in @plist
+        $print "    $p"
+
+subcode: probe(name, glob)
+    $foreach $p in @plist
+        my $p_dir="$p/$(name)/"
+        chdir $p_dir or next
+        my @all = glob("$(glob)*")
+        $if @all
+            my $d = $p_dir.$all[-1]
+            BLOCK
+            last
