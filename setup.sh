@@ -47,14 +47,6 @@ for a in output_c output_java output_python ; do
     make install
 done
 
-cd $HOME/projects
-if [ -d teach_2017 ]; then
-    cd teach_2017
-    git pull
-else
-    git clone https://github.com/hzhou/teach_2017
-fi
-
 cd $curdir
 
 if [[ "$uname" =~ Darwin ]]; then
