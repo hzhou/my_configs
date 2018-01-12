@@ -5,12 +5,12 @@ page: setup_windows
 
     $(if:1)
         &call probe, Java, jdk
-            system "ln -sv \"$d/bin/javac\" $home/bin/"
-            system "ln -sv \"$d/bin/java\" $home/bin/"
+            system "ln -sfv \"$d/bin/javac.exe\" $home/bin/javac"
+            system "ln -sfv \"$d/bin/java.exe\" $home/bin/java"
 
     $(if:1)
         &call probe, Python, Python
-            system "ln -sv \"$d/python\" $home/bin/"
+            system "ln -sfv \"$d/python.exe\" $home/bin/python"
             $if $d=~/Python3/
                 &call open_w, $home/lib/MyDef/python/_config.def
                      print Out "macros:\n    PYTHON3: 1\n"
