@@ -3,7 +3,6 @@ RESET="\[\033[0m\]"
 export PS1="${GREEN}\u [\W]${RESET}$ "
 # export PS1="\W $ ";
 export EDITOR=/usr/bin/vim
-
 export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
 
 PERL5LIB=$HOME/lib/perl5
@@ -12,3 +11,4 @@ MYDEFSRC=$HOME/projects/MyDef
 export PERL5LIB MYDEFLIB MYDEFSRC
 
 alias grep='grep --color=auto'
+alias ls='ls --color=auto'

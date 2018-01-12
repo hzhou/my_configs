@@ -1,6 +1,6 @@
 # need check make, vim, python3
 
-export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=$HOME/bin:$PATH
 uname=`uname -a`
 curdir=`pwd`
 
@@ -51,14 +51,16 @@ else
     git clone https://github.com/hzhou/teach_2017
 fi
 
+cd $curdir
+
 if [[ "$uname" =~ Darwin ]]; then
-    echo 'alias ls="ls -G"' >>$HOME/.bashrc
-else
-    echo 'alias ls="ls --color=auto"' >>$HOME/.bashrc
+    mydef_run setup_mac.def
 fi
 if [[ "$uname" =~ CYGWIN|Microsoft ]]; then
-    cd $curdir
     mydef_run setup_windows.def
+fi
+if [[ "$HOME" =~ com.termux ]]; then
+    mydef_run setup_android.def
 fi
 
 echo "RUN . ~/.bashrc"
