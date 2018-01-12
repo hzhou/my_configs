@@ -3,7 +3,7 @@ page: setup_termux
 
     my $home = $ENV{HOME}
     $if $home=~/(\/data\/data\/com.termux\/files)/
-        $prefix=$1
+        my $prefix=$1
         &call open_w, $home/.bashrc
             &call open_r, _bashrc
                 $if /export PATH=/

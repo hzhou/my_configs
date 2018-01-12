@@ -56,7 +56,7 @@ if [[ "$uname" =~ CYGWIN|Microsoft ]]; then
     mydef_run setup_windows.def
 fi
 if [[ "$HOME" =~ com.termux ]]; then
-    mydef_run setup_android.def
+    mydef_run setup_termux.def
 fi
 
 echo "RUN . ~/.bashrc"
