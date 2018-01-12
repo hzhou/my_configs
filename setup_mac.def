@@ -1,0 +1,9 @@
+page: setup_mac
+    module: perl
+
+    &call open_w, $home/.bashrc
+        &call open_r, _bashrc
+            $if /alias ls=/
+                print Out "alias ls='ls -G'\n"
+            $else
+                print Out $_

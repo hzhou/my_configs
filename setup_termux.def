@@ -1,0 +1,12 @@
+page: setup_termux
+    module: perl
+
+    my $home = $ENV{HOME}
+    $if $home=~/(\/data\/data\/com.termux\/files)/
+        $prefix=$1
+        &call open_w, $home/.bashrc
+            &call open_r, _bashrc
+                $if /export PATH=/
+                    print Out "export PATH=\$HOME/bin:$prefix/usr/bin:$prefix/usr/bin/applets\n"
+                $else
+                    print Out $_
