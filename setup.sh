@@ -33,7 +33,7 @@ MYDEFSRC=$HOME/projects/MyDef
 
 export PERL5LIB MYDEFLIB MYDEFSRC
 
-for a in output_c output_java output_python ; do
+for a in output_c ; do
     cd $HOME/projects
     if [ -d $a ]; then
         cd $a
