@@ -2,5 +2,6 @@ page: sync.sh
     $call sync_rc
 
 subcode: sync_rc
+    mydef_run mydef.def
     mydef_run vim.def
 

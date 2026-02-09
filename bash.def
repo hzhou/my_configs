@@ -1,0 +1,625 @@
+page: sync_bash.sh
+    # skiprun: 1
+
+    cp -v out/_bashrc $HOME/.bashrc
+
+page: _bashrc.none
+    skiprun: 1
+    $call basic
+    $call mydef
+    $call mymake
+    $call git
+    # $call temp
+
+    subcode: temp
+        alias vipy='vim maint/local_python/binding_c.py'
+        alias vif08='vim maint/local_python/binding_f08.py'
+        alias vidoc='vim doc/developer_guide.md'
+        alias vipass="vim $HOME/docs/argonne.txt"
+
+subcode: basic
+    unalias -a
+
+    export PS1="\w$ ";
+    export EDITOR='vim'
+    export GIT_EDITOR='vim +"set tw=72 fo+=w noai"'
+    DISABLE_AUTO_TITLE=true
+
+    shopt -s direxpand
+
+    MPI=$HOME/MPI
+    CORE_PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
+
+    # export NIX_PROFILES=/nix/var/nix/profiles/default /home/hzhou/.nix-profile
+    # export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+    NIXBIN=/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin
+
+    PATH=$MPI/bin:$NIXBIN:$CORE_PATH
+    export PATH
+
+    export USE_MYMAKE_LD=1
+    export MAKEFLAGS="-j 16"
+
+    subcode: ps1_color
+        GREEN="\[\033[32m\]"
+        RESET="\[\033[0m\]"
+        export PS1="${GREEN}\u [\W]${RESET}$ "
+
+subcode: mydef
+    PERL5LIB=$HOME/lib/perl5:$PERL5/lib/perl5
+    MYDEFLIB=$HOME/lib/MyDef
+    MYDEFSRC=$HOME/projects/MyDef
+    MYDEFBIN=$HOME/bin
+    export PERL5LIB MYDEFLIB MYDEFSRC MYDEFBIN
+
+subcode: mymake
+    export MYMAKE=$HOME/projects/mpich_study/mymake
+
+    alias mymake="perl $MYMAKE/mymake.pl"
+    alias mymake_log="perl $MYMAKE/mymake_log.pl"
+    alias mymake_log_show="perl $MYMAKE/mymake_log_show.pl"
+    alias build_modules="bash $HOME/work/mymake/build_modules.sh"
+    export MODTARBALL="$HOME/work/modules.tar.gz"
+
+    MYCONFIG="--disable-cxx --disable-fortran --disable-romio --enable-g=dbg"
+    alias mymake_ch3="perl $MYMAKE/mymake.pl --with-device=ch3 $MYCONFIG"
+    alias mymake_ch3_sock="perl $MYMAKE/mymake.pl --with-device=ch3:sock $MYCONFIG"
+    alias mymake_ucx="perl $MYMAKE/mymake.pl --with-device=ch4:ucx $MYCONFIG"
+    alias mymake_ofi="perl $MYMAKE/mymake.pl --with-device=ch4:ofi $MYCONFIG"
+    alias mymake_sock="perl $MYMAKE/mymake.pl --with-device=ch4:sock $MYCONFIG"
+    alias mymake_romio="perl $MYMAKE/mymake.pl --with-device=ch4:ofi --disable-fortran --enable-g=dbg"
+    alias mymake_fortran="perl $MYMAKE/mymake.pl --with-device=ch4:ofi --disable-romio --enable-g=dbg"
+    alias mymake_fortran_8="FCFLAGS=-fdefault-integer-8 perl $MYMAKE/mymake.pl --with-device=ch4:ofi --disable-romio --enable-g=dbg"
+    alias mymake_cxx="perl $MYMAKE/mymake.pl --with-device=ch4:ofi --disable-romio --disable-fortran --enable-g=dbg"
+
+    alias mymake_ofi_quick="perl $MYMAKE/mymake.pl --with-device=ch4:ofi --disable-cxx --disable-fortran --enable-g=dbg -quick"
+    alias mymake_args="cat mymake/args"
+
+    alias yaksa_make="sh autogen.sh && ./configure --prefix=/home/hzhou/work/temp/yaksa/_inst --enable-fast=O0 && make"
+
+    alias push_mymake='pushd $HOME/work/mymake && git commit -a -m "update" && git push && popd' 
+    alias debug_cpi='MPIR_CVAR_DEBUG_SUMMARY=1 ./cpi'
+
+    #---------------------------------------- 
+    export ch4=src/mpid/ch4/src
+    export ofi=src/mpid/ch4/netmod/ofi
+    export ucx=src/mpid/ch4/netmod/ucx
+    export sock=src/mpid/ch4/netmod/sock
+    export shm=src/mpid/common/shm
+    export posix=src/mpid/ch4/shm/posix
+    export ipc=src/mpid/ch4/shm/ipc
+    export ch4am=src/mpid/ch4/generic/am
+    export iqueue=src/mpid/ch4/shm/posix/eager/iqueue
+    export genq=src/mpid/common/genq
+    export romio=src/mpi/romio
+
+    export f08py=maint/local_python/binding_f08.py
+    export f77py=maint/local_python/binding_f77.py
+    export f90py=maint/local_python/binding_f90.py
+
+    export dbglog="-mpich-dbg=file -mpich-dbg-level=verbose -mpich-dbg-filename=dbg%d@T-%t@.log"
+
+    function set_lib {
+        if test -d _inst ; then
+            if test -d src/mpi ; then
+                rm -f $HOME/MPI
+                ln -s $PWD/_inst $HOME/MPI
+                ls -l $HOME/MPI
+            elif test -d src/shmem ; then
+                export PATH=$PWD/_inst/bin:$MPI/bin:$CORE_PATH
+                export CPATH=$PWD/_inst/include:$MPI/include
+                export LIBRARY_PATH=$PWD/_inst/lib:$MPI/lib
+                export LD_LIBRARY_PATH=$PWD/_inst/lib:$MPI/lib
+                echo setting PATH=$PATH
+            else
+                # set to MPI anyway
+                rm -f $HOME/MPI
+                ln -s $PWD/_inst $HOME/MPI
+                ls -l $HOME/MPI
+            fi
+        elif test -n $1 ; then
+            rm -f $HOME/MPI
+            ln -s $HOME/opt/$1 $HOME/MPI
+            ls -l $HOME/MPI
+        fi
+    }
+
+    
+subcode: git
+    alias gitlog='git log -n 40 --format="format:%h %ad %s" --date="format:%m/%d %H:%M"'
+    alias gitlog_more='git log -n 100 --format="format:%h %ad %s" --date="format:%m/%d %H:%M"'
+    alias gitshow='git show --stat'
+    alias gitstatus='git status --untracked-files=all --ignored'
+    alias gitls='git ls-tree -r --name-only main'
+    alias gitpick='git cherry-pick'
+    alias gitpickca='git add --all && git cherry-pick --continue'
+    alias gitupdate='git checkout main && git pull && git checkout @{-1}'
+    alias gitupdate_main='git checkout main && git pull && git checkout @{-1} && git rebase main'
+    alias gitbranch="git rev-parse --abbrev-ref HEAD"
+    alias gitnew="git checkout main && git checkout -b"
+    alias gitpush="git stash"
+    alias gitpop="git stash pop"
+    alias git_pr_push="git push gh-hzhou"
+    alias gitpickaxe="git log -p -S"
+    alias gitfile="git log --follow --"
+    alias gitdummy="echo 1 >> dummy && git add dummy && git commit --allow-empty -m '---- START HERE ----'"
+    alias gitstat="git-quick-stats --commits-per-author |head -n 40"
+    alias vigit="vim .git/config"
+    alias gitapply="git apply /tmp/t.patch"
+
+    alias gitrb="git rebase --abort"
+    alias git_last_merg="git log -1 --merges --pretty=format:'%h'"
+    alias gitrc="git rebase --continue"
+    alias gitrca="git add --all && git rebase --continue"
+    alias gitra="git commit --amend"
+    alias gitraa="git commit -a --amend"
+
+    alias gitok="perl $HOME/bin/git_commit_ok.pl"
+    alias git_branch_delete="git branch --merged main | grep -v main | xargs git branch -D"
+
+    function git_branch_delete_remote {
+        git fetch --prune gh-hzhou
+        git branch -r --merged main --list 'gh-hzhou/*' | sed 's/gh-hzhou\///' | grep -v main | xargs git push gh-hzhou --delete
+    }
+
+    function gitri10 {
+        git rebase -i HEAD~10
+    }
+    function gitrii {
+        local commit=`git log -1 --merges --pretty=format:'%h'`
+        git rebase -i $commit
+    }
+    function git_reset_last_merge {
+        local commit=`git log -1 --merges --pretty=format:'%h'`
+        git reset --hard $commit
+    }
+    function git_re_date {
+        local commit=`git log -1 --merges --pretty=format:'%h'`
+        git_re_date.pl $commit
+    }
+
+    function gitupdate_remote {
+        git remote remove tmp_remote || return 1
+        if [[ $1 =~ .git$ ]] ; then
+            echo "add tmp_remote $1..."
+            git remote add tmp_remote git@github.com:$1 || return 1
+        else
+            echo "add tmp_remote $1/mpich..."
+            git remote add tmp_remote git@github.com:$1/mpich.git || return 1
+        fi
+        git fetch tmp_remote || return 1
+        git checkout tmp_remote/$2 -b tmp_$2 || return 1
+        gitupdate_main || return 1
+        git push -f tmp_remote tmp_$2:$2 || return 1
+        git checkout main
+        git branch -D tmp_$2
+    }
+
+
+subcode: barn
+    alias ls="ls --color"
+    alias lsd="ls -d */"
+    alias grep='grep --color=auto'
+    alias findname='find . -name'
+    alias cdsync='cd $(tmux display-message -p -F "#{pane_current_path}" -t0)'
+    alias set_spack=". /d2/spack/share/spack/setup-env.sh"
+    export SPACK_BUILTIN="$HOME/.spack/package_repos/fncqgg4/repos/spack_repo/builtin"
+
+    alias qemu_ssh='ssh -o "StrictHostKeyChecking no" -p 2001 localhost'
+    alias killquem="killall qemu-system-x86_64"
+
+    alias tmux_cat="tmux capture-pane -p -S -"
+
+    alias sde="/opt/sde/sde"
+    # alias blank="xset dpms force off"
+
+    function start_conda {
+        eval "$(/home/hzhou/anaconda3/bin/conda shell.bash hook)"
+    }
+
+    #----------------------------------------
+    function posix {
+    if [ -z "$1" ]; then
+        lynx "$HOME/Documents/posix-2018/idx/utilities.html"
+    else
+        HTMLFILE="$HOME/Documents/posix-2018/utilities/$1.html"
+        if [ -s "$HTMLFILE" ]; then
+        lynx "$HTMLFILE"
+        else
+        echo "No matching file for '$1'"
+        fi
+    fi
+    }
+
+    #----------------------------------------
+    CC=
+    CXX=
+    FC=
+    CFLAGS=
+    LDFLAGS=
+    LD_PRELOAD=
+
+    alias set_mold="sudo ln -sf /home/hzhou/packages/mold/mold /usr/bin/ld"
+    alias set_ld="sudo ln -sf ld.bfd /usr/bin/ld"
+
+    function set_opt {
+        OTHER=$HOME/opt
+
+        PATH=$OTHER/bin:$MPI/bin:$CORE_PATH
+        CPATH=$OTHER/include:$MPI/bin
+        LIBRARY_PATH=$OTHER/lib:$MPI/lib
+        LD_LIBRARY_PATH=$LIBRARY_PATH
+        export PATH CPATH LIBRARY_PATH LD_LIBRARY_PATH
+    }
+
+    function set_cuda {
+        export PATH=$MPI/bin:$CUDA/bin:$CORE_PATH
+        export CPATH=$MPI/include:$CUDA/include:$CPATH
+        export LIBRARY_PATH=$MPI/lib:$CUDA/lib64
+        export LD_LIBRARY_PATH=$LIBRARY_PATH
+    }
+
+    function set_ze {
+        ZE=$HOME/scripts/ze
+        export CPATH=$MPI/include:$ZE/include:$CPATH
+        export LIBRARY_PATH=$MPI/lib:$ZE/lib64
+        export LD_LIBRARY_PATH=$LIBRARY_PATH
+    }
+
+    function set_xpmem {
+        export CPATH=$MPI/include:/opt/xpmem/include:$CPATH
+        export LIBRARY_PATH=$MPI/lib:/opt/xpmem/lib
+        export LD_LIBRARY_PATH=$LIBRARY_PATH
+    }
+
+    function set_slurm {
+        export CPATH=$MPI/include:/$HOME/opt/slurm/include:$CPATH
+        export LIBRARY_PATH=$MPI/lib:/$HOME/opt/slurm/lib
+        export LD_LIBRARY_PATH=$LIBRARY_PATH
+    }
+
+    function set_pgi {
+        export PATH=$PATH:/opt/pgi/linux86-64-llvm/19.4/bin
+        export CC=pgcc
+        export CXX=pgc++
+        export FC=pgfortran
+    }
+
+    function set_sun {
+        export PATH=$PATH:/opt/OracleDeveloperStudio12.6/bin
+        export CC=suncc
+        export CXX=sunCC
+        export FC=sunf95
+    }
+
+    function set_intel {
+        intel=$HOME/opt/intel
+        export PATH=$PATH:$intel/bin
+        export INTEL_LICENSE_FILE=28518@lic001.cels.anl.gov
+        export CC=icc
+        export CXX=icpc
+        export FC=ifort
+    }
+
+    function set_gcc {
+        export PATH=$HOME/opt/gcc-$1/bin:$PATH
+        export LD_LIBRARY_PATH=$HOME/opt/gcc-$1/lib64:$LD_LIBRARY_PATH
+        export CC=gcc-$1
+        export CXX=g++-$1
+        export FC=gfortran-$1
+    }
+
+    function set_clang {
+        if test -n "$1" ; then
+            export LD_LIBRARY_PATH=$HOME/opt/clang-$1/lib:$LD_LIBRARY_PATH
+            export PATH=$HOME/opt/clang-$1/bin:$PATH
+            export CC=clang-$1
+        else
+            export CC=clang
+        fi
+        export CXX=clang++
+        export FC=gfortran
+    }
+
+    function set_nag {
+        # missing nag
+        export CC=gcc
+        export CXX=g++
+        export FC=nagfor
+    }
+
+    function set_asan {
+        export CFLAGS="-fsanitize=address -O1 -fno-omit-frame-pointer"
+        export LDFLAGS="-fsanitize=address"
+        export LD_PRELOAD="libasan.so.4"
+    }
+
+    function set_maven {
+        PATH=$HOME/opt/apache-maven-3.6.3/bin:/opt/jdk-12/bin:$PATH
+        export PATH
+        export JAVA_HOME=/opt/jdk-12
+    }
+
+    function set_hwloc {
+        export PATH=$HOME/opt/hwloc/bin:$PATH
+        export CPATH=$HOME/opt/hwloc/include:$CPATH
+        export LIBRARY_PATH=$HOME/opt/hwloc/lib:$LIBRARY_PATH
+        export LD_LIBRARY_PATH=$HOME/opt/hwloc/lib:$LD_LIBRARY_PATH
+    }
+
+    function set_pmix {
+        export MPIEXEC=$HOME/opt/openmpi-5.0.7/bin/mpiexec
+        export PMIX=$HOME/opt/pmix-5.0.7
+        export LD_LIBRARY_PATH=$PMIX/lib:$LD_LIBRARY_PATH
+    }
+
+    function set_mpich {
+        if test -z $1 ; then
+            ver=4.2.0b1
+        else
+            ver=$1
+        fi
+        if test -d /d1/releases/$ver ; then
+            rm -f $HOME/MPI
+            ln -s /d1/releases/$ver $HOME/MPI
+            ls -l $HOME/MPI
+        fi
+    }
+
+    function set_mpe {
+        export PATH=$PWD/_inst/bin:$PATH
+    }
+
+    function set_hydra {
+        export PATH=$HOME/MPI/bin:$HOME/opt/hydra/bin:$CORE_PATH
+    }
+
+    function install_hydra {
+        perl $MYMAKE/mymake.pl --prefix=$HOME/opt/hydra -quick
+        make hydra-install
+    }
+
+    function set_ompi {
+        export PATH=$HOME/MPI/bin:$HOME/opt/OMPI-5.0/bin:$CORE_PATH
+    }
+
+    function set_mpi4py {
+        # export PYTHONPATH=$HOME/opt/mpi4py/lib/python3.6/site-packages
+        PYTHON=python3.10
+        PREFIX=$HOME/work/pull_requests/mpi4py/_inst
+        export PYTHONPATH=$PREFIX/lib/$PYTHON/site-packages
+    }
+
+    function install_mpi4py {
+        python setup.py clean --all
+        python setup.py install --prefix=/home/hzhou/opt/mpi4py
+    }
+
+    function test_mpi4py {
+        PYTHON=python3.10
+        PREFIX=$HOME/work/pull_requests/mpi4py/_inst
+        # export PYTHONPATH=$PREFIX/lib64/$PYTHON/site-packages
+        # export PYTHONPATH=$PREFIX/lib/$PYTHON/site-packages
+        export PYTHONPATH=$PREFIX/local/lib/$PYTHON/dist-packages
+
+        cd $HOME/work/pull_requests
+        rm -rf mpi4py
+        git clone https://github.com/mpi4py/mpi4py
+        cd mpi4py
+        # git checkout feature/MPI-41
+        # git checkout 3.0.3 -b build
+        $PYTHON setup.py install --prefix=$PREFIX
+        cd test
+        $PYTHON runtests.py -v | tee np-0.log
+
+        echo PYTHONPATH=$PYTHONPATH
+    }
+
+    function set_test {
+        echo " --> [test.sh]"
+        cat << EOF > test.sh
+    export MPIR_CVAR_ODD_EVEN_CLIQUES=1
+    export MPIEXEC_TIMEOUT=30
+    # export MPITEST_VERBOSE=1
+    # export FI_PROVIDER=sockets
+    # export MPIR_CVAR_DEBUG_SUMMARY=1
+    # export MPIR_CVAR_DEBUG_PROGRESS_TIMEOUT=6
+    # export MPIR_CVAR_CH4_NUM_VCIS=4
+    # export MPITEST_THREADLEVEL_DEFAULT=MULTIPLE
+    # export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.4
+
+    for i in {1..1} ; do
+        echo ==== \$i ====
+        time mpirun -l -n 1 ./test || exit 1
+    done
+    EOF
+        echo " --> [.gdbinit]"
+        cat << EOF > .gdbinit
+    set \$_exitcode = -999
+    break MPIR_Assert_fail
+
+    run
+    if \$_exitcode == -999
+        backtrace
+    end
+    quit \$_exitcode
+    EOF
+    }
+
+    #----------------------------------------
+    MPICH_ORIG=https://github.com/pmodels/mpich
+    MPICH_GITHUB=$HOME/work/mpich-github
+    export mpich=$MPICH_GITHUB
+
+    function clone_git {
+        git clone ssh://dragontiger.org/media/Repo/$1.git
+    }
+
+    function mpich_pr {
+        cd $HOME/work/pull_requests
+        if test x$1 = xmain ; then
+            rm -rf mpich-main
+            git clone -b main $MPICH_ORIG mpich-main
+            cd mpich-main
+        elif test x$1 = xhome ; then
+            branch=$(cd $MPICH_GITHUB && git rev-parse --abbrev-ref HEAD)
+            rm -rf $branch
+            git clone -b $branch $MPICH_GITHUB $branch
+            cd $branch
+        elif [[ $1 =~ ^[0-9]+$ ]] ; then
+            rm -rf mpich$1
+            perl $HOME/bin/get_mpich_pr.pl $1
+            cd mpich$1
+        else
+            rm -rf $1
+            git clone -b $1 $MPICH_GITHUB branch-$1
+            cd $1
+        fi
+    }
+
+    function osh_pr {
+        if test x$1 = xmaster ; then
+            cd $HOME/work/pull_requests
+            rm -rf osh-master
+            git clone -b master https://github.com/pmodels/oshmpi osh-master
+            cd osh-master
+        elif [[ $1 =~ ^[0-9]+$ ]] ; then
+            cd $HOME/work/pull_requests
+            rm -rf oshmpi$1
+            perl $HOME/bin/get_osh_pr $1
+            cd oshmpi$1
+        else
+            echo wrong argument: [$1]
+        fi
+    }
+
+    function mpich_branch {
+        cd $HOME/work/pull_requests
+        rm -rf mpich-$1
+        git clone $MPICH_GITHUB mpich-$1
+        cd mpich-$1
+        git checkout $1
+    }
+
+    function mpich_pr_sync {
+        for a in "$@" ; do
+            cp -v $a $MPICH_GITHUB/$a
+        done
+    }
+
+    function mpich_pr_sync_all {
+        for a in `git status -s | perl -ne 'print "$1\n" if / M (.+)/'` ; do
+            cp -v $a $MPICH_GITHUB/$a
+        done
+    }
+
+    function mpich_whitespace {
+        REPO=$PWD
+        pushd $HOME/work/pull_requests
+        if test -d mpich-whitespace ; then
+            rm -rf mpich-whitespace
+        fi
+        
+        echo git clone mpich-github mpich-whitespace ...
+        git clone $REPO mpich-whitespace
+        cd mpich-whitespace
+        git config core.whitespace blank-at-eol,blank-at-eof,space-before-tab,tab-in-indent
+
+        git fetch origin
+        git checkout $1
+        git rebase --verbose --exec maint/hooks/pre-commit origin/main
+        popd
+    }
+
+    function mpich_spellcheck {
+        REPO=$PWD
+        pushd $HOME/work/pull_requests
+        if test -d mpich-spellcheck ; then
+            rm -rf mpich-spellcheck
+        fi
+        
+        echo git clone mpich-github mpich-spellcheck ...
+        git clone $REPO mpich-spellcheck
+        cd mpich-spellcheck
+
+        git fetch origin
+        git checkout $1
+        git rebase --verbose --exec maint/hooks/spellchecker origin/main
+        popd
+    }
+
+    function mpich_build {
+        git submodule update --init
+        time ./autogen.sh |tee autogen.log
+        # time ./configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda |tee c.txt
+        time ./configure --prefix=$PWD/_inst --enable-g=all --with-device=ch3 |tee c.txt
+        time make install |tee m.txt
+    }
+
+    function mpich_build_quick {
+        set -e
+        git submodule update --init
+        time ./autogen.sh -quick -with-ofi -with-yaksa -with-hydra -with-json -with-hwloc -yaksa-depth=2 |tee autogen.log
+        time ./configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda  --disable-cxx --disable-fortran --disable-romio |tee c.txt
+        time make install |tee m.txt
+    }
+
+    function mpich_build_vpath {
+        git submodule update --init
+        time ./autogen.sh |tee autogen.log
+        mkdir -p build
+        cd build
+        time ../configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda |tee c.txt
+        time make install |tee m.txt
+    }
+
+    function vpath_build {
+        git submodule update --init
+        time ./autogen.sh
+        mkdir build && cd build
+        time ../configure --prefix=$PWD/_inst --with-device=ch4:ofi --without-cuda
+        time make install
+    }
+
+    complete -W 'MPICH3.2 MPICH3.3 MPI-fortran MPI-test OMPI4.0 share TOY' set_lib
+
+    #---------------------------------------- 
+    export LG_RT_DIR=$HOME/work/LEGION/legion-gitlab/runtime
+
+    #---------------------------------------- 
+    # take a note
+    function note {
+    if [ -z "$1" ]; then
+        echo "No note entered."
+    else
+        echo "$@" >> "$HOME/docs/_line_notes"
+    fi
+    }
+
+    # display notes
+    function notes {
+    FN="$HOME/docs/_line_notes"
+    if [ ! -f "$FN" ]; then
+        echo "No notes (file missing)."
+        return
+    fi
+
+    if [ -z "$1" ]; then
+        LINECOUNT="10"
+    else
+        LINECOUNT="$1"
+    fi
+    LNUM=$(wc -l "$FN"|cut -d " " -f1)
+    echo "Showing max $LINECOUNT of $LNUM notes."
+    tail "$FN" -n "$LINECOUNT"
+    }
+
+    # clear all notes
+    function clearnotes {
+    rm "$HOME/docs/_line_notes"
+    touch "$HOME/docs/_line_notes"
+    }
+
+    function pass {
+        ssh home -C perl /home/hzhou/projects/scripts/out/pass.pl $*
+    }
