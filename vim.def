@@ -1,0 +1,143 @@
+page: sync_vim.sh
+    # skiprun: 1
+    cp -v out/_vimrc $HOME/.vimrc
+
+    if [ -d "$MYDEFSRC" ]; then
+        mkdir -p $HOME/.vim/syntax
+        cp -v out/_vim/filetype.vim    $HOME/.vim/
+        cp -v $MYDEFSRC/docs/mydef.vim $HOME/.vim/syntax/
+    fi
+
+#---------------------------------------- 
+page: _vimrc.none
+    skiprun: 1
+    $call basic
+    $call shortcut
+
+subcode: basic
+    :set background=dark
+    :set laststatus=2
+    :set ruler
+    :set showmode
+    :set autoindent
+    :set shiftwidth=4
+    :set expandtab
+    :set shiftround
+    :set hlsearch
+    :syntax on
+
+    :set pastetoggle=<F12>
+    :nmap <F5> :!mydef_run %<CR>
+    :nmap <F9> :q!<CR>
+    :nmap <F10> :make install<CR>
+
+subcode: shortcut
+    :abbr #i #include
+    :abbr #d #define
+    :abbr ## #----------------------------------------
+    :abbr 2# ##
+    :abbr 3# ###
+    :abbr 4# ####
+    :abbr 5# #####
+    :abbr 6# ###### 
+
+page: filetype.vim
+    output_dir: _vim
+    skiprun: 1
+
+    augroup filetypedetect
+        au BufNewFile,BufRead *.def setf mydef
+    augroup END
+
+#---------------------------------------- 
+subcode: temp
+    " Temporary stuff ----
+    " :imap <F11> -- <CR>Hui Zhou<CR>630-448-0159<CR>
+    :imap <F11> #ifdef MULTI_TESTS<CR>#define run rma_XXX<CR>int run(const char *arg);<CR>#endif<CR> 
+    " End Temporary stuff 
+
+subcode: fortran
+    let fortran_free_source=1
+    let fortran_do_enddo=1
+    filetype plugin indent on
+
+subcode: highlight
+    :highlight ExtraWhitespace ctermbg=yellow
+    " :match ExtraWhitespace /\s\+$/
+    " useful: gq :retab
+
+subcode: fold
+    set foldtext=MyFoldText()
+    function MyFoldText()
+        let num = v:foldend - v:foldstart + 1
+        if num < 10
+            let pat = repeat('.', num) . repeat(' ', 12 - num)
+        elseif num < 100
+            let pat = repeat('*', num/10) . repeat(' ', 12 - num/10)
+        elseif num < 1000
+            let pat = repeat('*', num/100) . repeat(' ', 12 - num/100)
+        else
+            let pat = repeat("-", 12)
+        endif
+        let line = " " . pat . repeat(' ', 100)
+        return line
+    endfunction
+    :hi Folded ctermfg=gray ctermbg=none     
+
+    :nmap <F3> :set foldmethod=indent<CR>
+    :nmap <F4> :set foldmethod=manual<CR>zE
+
+subcode: barn
+    map q: <Nop>
+    nnoremap Q <nop>
+    :let loaded_matchparen = 1
+    :set completeopt=preview
+    :nmap <F1> :set relativenumber!<CR>
+    :nmap <silent> <F2> :silent noh<CR>
+
+
+    " if(){ } pattern to mydef
+    let @i="i$f(%f{%dd'^f(%d$'^f(r '^"
+    let @j="i$f{ma%dd'af{x^"
+
+    set t_Co=256
+
+    :nnoremap ,sp :set spell!<cr>
+    :nnoremap ,rc :vsplit $MYVIMRC<cr>
+    :nnoremap ,src :source $MYVIMRC<cr>
+
+    :nnoremap <F8> :call EditFilter()<cr>
+    :nnoremap <F7> :call RunFilter("insert")<cr>
+    :nnoremap <F6> :call RunFilter("filter")<cr>
+
+    :function! EditFilter()
+    :  new
+    :  r$HOME/projects/vim_filter/template_1.def
+    :  w! $HOME/projects/vim_filter/vim_filter.def
+    :  execute "normal! 99j$"
+    :endfunction
+
+    :function! RunFilter(mode)
+    :  w!
+    :  let cmd = "mydef_run -silent $HOME/projects/vim_filter/vim_filter.def"
+    :  if a:mode=="filter"
+    :    execute "%!" . cmd
+    :  else
+    :    execute "r!" . cmd
+    :  endif
+    :  w
+    :endfunction
+
+    :augroup rc
+    :  autocmd!
+    :  autocmd FileType * set nocindent
+    :augroup END
+
+    :command! -nargs=+ Find :!grep '<args>' my_tex.def macros_web/*.def
+
+    " :call SetTab()
+    :function SetTab()
+    :  set noexpandtab
+    :  set list
+    :  set listchars=tab:>-
+    :endfunction

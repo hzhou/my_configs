@@ -1,0 +1,35 @@
+page: set_mydef.sh
+    mkdir -p $HOME/bin
+    mkdir -p $HOME/lib
+    mkdir -p $HOME/projects
+
+    cd $HOME/projects
+    if [ -d MyDef ]; then
+        cd MyDef
+        git pull
+    else
+        git clone https://github.com/hzhou/MyDef
+        cd MyDef
+    fi
+    sh bootstrap.sh
+
+    PERL5LIB=$HOME/lib/perl5
+    MYDEFLIB=$HOME/lib/MyDef
+    MYDEFSRC=$HOME/projects/MyDef
+
+    export PERL5LIB MYDEFLIB MYDEFSRC
+
+    for a in output_c ; do
+        cd $HOME/projects
+        if [ -d $a ]; then
+            cd $a
+            git pull
+        else
+            git clone https://github.com/hzhou/$a
+            cd $a
+        fi
+        mydef_make
+        make
+        make install
+    done
+
