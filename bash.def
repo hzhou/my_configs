@@ -40,6 +40,11 @@ subcode: basic
     export USE_MYMAKE_LD=1
     export MAKEFLAGS="-j 16"
 
+    alias ls="ls --color"
+    alias lsd="ls -d */"
+    alias grep='grep --color=auto'
+    alias findname='find . -name'
+    alias cdsync='cd $( tmux display-message -p -F "#{pane_current_path}" -t0 )'
     subcode: ps1_color
         GREEN="\[\033[32m\]"
         RESET="\[\033[0m\]"
@@ -197,11 +202,6 @@ subcode: git
 
 
 subcode: barn
-    alias ls="ls --color"
-    alias lsd="ls -d */"
-    alias grep='grep --color=auto'
-    alias findname='find . -name'
-    alias cdsync='cd $(tmux display-message -p -F "#{pane_current_path}" -t0)'
     alias set_spack=". /d2/spack/share/spack/setup-env.sh"
     export SPACK_BUILTIN="$HOME/.spack/package_repos/fncqgg4/repos/spack_repo/builtin"
 
