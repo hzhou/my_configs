@@ -1,0 +1,40 @@
+macros:
+    commit_hash: 6c5e707c6b5339359a9a9e215c5e66d6d802fd7a # 25.11 - 260210
+
+
+subcode: basic_frame
+    let
+        nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/$(commit_hash).tar.gz";
+        pkgs = import nixpkgs { config = {allowUnfree = true;}; overlays = []; };
+    in
+
+    pkgs.mkShell {
+        packages = with pkgs; [
+            $(pkgs)
+        ];
+
+        shellHook = ''
+            $call main
+        '';
+    }
+
+#---------------------------------------- 
+
+page: claude.nix, basic_frame
+    output_dir: ./nix
+    pkgs:
+
+    $call set_PS1, claude
+    alias claude='$HOME/.local/share/claude/versions/2.1.39'
+
+page: opencode.nix, basic_frame
+    output_dir: ./nix
+    pkgs:
+
+    $call set_PS1, opencode
+    alias opencode='$HOME/.opencode/bin/opencode'
+
+#---------------------------------------- 
+
+subcode: set_PS1(name)
+    export PS1='\n\[\033[1;32m\][$(name):\w]\$\[\033[0m\] '
