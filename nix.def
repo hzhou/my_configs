@@ -46,6 +46,11 @@ page: win32.nix, basic_frame
     alias wcc=$WCC
 
 #---------------------------------------- 
+page: npm.nix, basic_frame
+    output_dir: ./nix
+    pkgs: nodejs
+
+#---------------------------------------- 
 
 subcode: set_PS1(name)
     export PS1='\n\[\033[1;32m\][$(name):\w]\$\[\033[0m\] '
