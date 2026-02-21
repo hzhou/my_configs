@@ -5,9 +5,9 @@ macros:
 subcode: basic_frame
     let
         nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/$(commit_hash).tar.gz";
-        pkgs = import nixpkgs { config = {allowUnfree = true;}; overlays = []; };
-    in
+        $call set_pkgs
 
+    in
     pkgs.mkShell {
         packages = with pkgs; [
             $(pkgs)
@@ -17,6 +17,9 @@ subcode: basic_frame
             $call main
         '';
     }
+
+subcode: set_pkgs
+    pkgs = import nixpkgs { config = {allowUnfree = true;}; overlays = []; };
 
 #---------------------------------------- 
 
@@ -33,6 +36,14 @@ page: opencode.nix, basic_frame
 
     $call set_PS1, opencode
     alias opencode='$HOME/.opencode/bin/opencode'
+
+page: win32.nix, basic_frame
+    output_dir: ./nix
+    pkgs: pkgsCross.mingwW64.stdenv.cc
+
+    $call set_PS1, win32
+    export WCC=x86_64-w64-mingw32-gcc
+    alias wcc=$WCC
 
 #---------------------------------------- 
 
