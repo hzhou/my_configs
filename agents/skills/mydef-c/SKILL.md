@@ -1,5 +1,5 @@
 ---
-name: mydef_c
+name: mydef-c
 description: Write C code in MyDef.
 ---
 
