@@ -1,3 +1,5 @@
+include: site.def?
+
 page: sync_bash.sh
     # skiprun: 1
 
@@ -9,7 +11,7 @@ page: _bashrc.none
     $call mydef
     $call mymake
     $call git
-    # $call temp
+    $call @bash_site
 
     subcode: temp
         alias vipy='vim maint/local_python/binding_c.py'
@@ -128,6 +130,142 @@ subcode: mymake
             ln -s $HOME/opt/$1 $HOME/MPI
             ls -l $HOME/MPI
         fi
+    }
+
+    MPICH_ORIG=https://github.com/pmodels/mpich
+    MPICH_GITHUB=$HOME/work/mpich-github
+
+    function mpich_pr {
+        cd $HOME/work/pull_requests
+        if test x$1 = xmain ; then
+            rm -rf mpich-main
+            git clone -b main $MPICH_ORIG mpich-main
+            cd mpich-main
+        elif test x$1 = xhome ; then
+            branch=$( cd $MPICH_GITHUB && git rev-parse --abbrev-ref HEAD)
+            rm -rf $branch
+            git clone -b $branch $MPICH_GITHUB $branch
+            cd $branch
+        elif [[ $1 =~ ^[0-9]+$ ]] ; then
+            rm -rf mpich$1
+            perl $HOME/bin/get_mpich_pr.pl $1
+            cd mpich$1
+        else
+            rm -rf $1
+            git clone -b $1 $MPICH_GITHUB branch-$1
+            cd $1
+        fi
+    }
+
+    function mpich_pr_sync {
+        for a in "$@" ; do
+            cp -v $a $MPICH_GITHUB/$a
+        done
+    }
+
+    function mpich_pr_sync_all {
+        for a in `git status -s | perl -ne 'print "$1\n" if / M (.+)/'` ; do
+            cp -v $a $MPICH_GITHUB/$a
+        done
+    }
+
+    function mpich_whitespace {
+        REPO=$PWD
+        pushd $HOME/work/pull_requests
+        if test -d mpich-whitespace ; then
+            rm -rf mpich-whitespace
+        fi
+        
+        echo git clone mpich-github mpich-whitespace ...
+        git clone $REPO mpich-whitespace
+        cd mpich-whitespace
+        git config core.whitespace blank-at-eol,blank-at-eof,space-before-tab,tab-in-indent
+
+        git fetch origin
+        git checkout $1
+        git rebase --verbose --exec maint/hooks/pre-commit origin/main
+        popd
+    }
+
+    function mpich_spellcheck {
+        REPO=$PWD
+        pushd $HOME/work/pull_requests
+        if test -d mpich-spellcheck ; then
+            rm -rf mpich-spellcheck
+        fi
+        
+        echo git clone mpich-github mpich-spellcheck ...
+        git clone $REPO mpich-spellcheck
+        cd mpich-spellcheck
+
+        git fetch origin
+        git checkout $1
+        git rebase --verbose --exec maint/hooks/spellchecker origin/main
+        popd
+    }
+
+    function mpich_build {
+        git submodule update --init
+        time ./autogen.sh |tee autogen.log
+        # time ./configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda |tee c.txt
+        time ./configure --prefix=$PWD/_inst --enable-g=all --with-device=ch3 |tee c.txt
+        time make install |tee m.txt
+    }
+
+    function mpich_build_quick {
+        set -e
+        git submodule update --init
+        time ./autogen.sh -quick -with-ofi -with-yaksa -with-hydra -with-json -with-hwloc -yaksa-depth=2 |tee autogen.log
+        time ./configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda  --disable-cxx --disable-fortran --disable-romio |tee c.txt
+        time make install |tee m.txt
+    }
+
+    function mpich_build_vpath {
+        git submodule update --init
+        time ./autogen.sh |tee autogen.log
+        mkdir -p build
+        cd build
+        time ../configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda |tee c.txt
+        time make install |tee m.txt
+    }
+
+    function vpath_build {
+        git submodule update --init
+        time ./autogen.sh
+        mkdir build && cd build
+        time ../configure --prefix=$PWD/_inst --with-device=ch4:ofi --without-cuda
+        time make install
+    }
+
+    function set_test {
+        echo " --> [test.sh]"
+        cat << EOF > test.sh
+    export MPIR_CVAR_ODD_EVEN_CLIQUES=1
+    export MPIEXEC_TIMEOUT=30
+    # export MPITEST_VERBOSE=1
+    # export FI_PROVIDER=sockets
+    # export MPIR_CVAR_DEBUG_SUMMARY=1
+    # export MPIR_CVAR_DEBUG_PROGRESS_TIMEOUT=6
+    # export MPIR_CVAR_CH4_NUM_VCIS=4
+    # export MPITEST_THREADLEVEL_DEFAULT=MULTIPLE
+    # export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.4
+
+    for i in {1..1} ; do
+        echo ==== \$i ====
+        time mpirun -l -n 1 ./test || exit 1
+    done
+    EOF
+        echo " --> [.gdbinit]"
+        cat << EOF > .gdbinit
+    set \$_exitcode = -999
+    break MPIR_Assert_fail
+
+    run
+    if \$_exitcode == -999
+        backtrace
+    end
+    quit \$_exitcode
+    EOF
     }
 
     
@@ -416,37 +554,6 @@ subcode: barn
         echo PYTHONPATH=$PYTHONPATH
     }
 
-    function set_test {
-        echo " --> [test.sh]"
-        cat << EOF > test.sh
-    export MPIR_CVAR_ODD_EVEN_CLIQUES=1
-    export MPIEXEC_TIMEOUT=30
-    # export MPITEST_VERBOSE=1
-    # export FI_PROVIDER=sockets
-    # export MPIR_CVAR_DEBUG_SUMMARY=1
-    # export MPIR_CVAR_DEBUG_PROGRESS_TIMEOUT=6
-    # export MPIR_CVAR_CH4_NUM_VCIS=4
-    # export MPITEST_THREADLEVEL_DEFAULT=MULTIPLE
-    # export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libasan.so.4
-
-    for i in {1..1} ; do
-        echo ==== \$i ====
-        time mpirun -l -n 1 ./test || exit 1
-    done
-    EOF
-        echo " --> [.gdbinit]"
-        cat << EOF > .gdbinit
-    set \$_exitcode = -999
-    break MPIR_Assert_fail
-
-    run
-    if \$_exitcode == -999
-        backtrace
-    end
-    quit \$_exitcode
-    EOF
-    }
-
     #----------------------------------------
     MPICH_ORIG=https://github.com/pmodels/mpich
     MPICH_GITHUB=$HOME/work/mpich-github
@@ -454,28 +561,6 @@ subcode: barn
 
     function clone_git {
         git clone ssh://dragontiger.org/media/Repo/$1.git
-    }
-
-    function mpich_pr {
-        cd $HOME/work/pull_requests
-        if test x$1 = xmain ; then
-            rm -rf mpich-main
-            git clone -b main $MPICH_ORIG mpich-main
-            cd mpich-main
-        elif test x$1 = xhome ; then
-            branch=$(cd $MPICH_GITHUB && git rev-parse --abbrev-ref HEAD)
-            rm -rf $branch
-            git clone -b $branch $MPICH_GITHUB $branch
-            cd $branch
-        elif [[ $1 =~ ^[0-9]+$ ]] ; then
-            rm -rf mpich$1
-            perl $HOME/bin/get_mpich_pr.pl $1
-            cd mpich$1
-        else
-            rm -rf $1
-            git clone -b $1 $MPICH_GITHUB branch-$1
-            cd $1
-        fi
     }
 
     function osh_pr {
@@ -500,86 +585,6 @@ subcode: barn
         git clone $MPICH_GITHUB mpich-$1
         cd mpich-$1
         git checkout $1
-    }
-
-    function mpich_pr_sync {
-        for a in "$@" ; do
-            cp -v $a $MPICH_GITHUB/$a
-        done
-    }
-
-    function mpich_pr_sync_all {
-        for a in `git status -s | perl -ne 'print "$1\n" if / M (.+)/'` ; do
-            cp -v $a $MPICH_GITHUB/$a
-        done
-    }
-
-    function mpich_whitespace {
-        REPO=$PWD
-        pushd $HOME/work/pull_requests
-        if test -d mpich-whitespace ; then
-            rm -rf mpich-whitespace
-        fi
-        
-        echo git clone mpich-github mpich-whitespace ...
-        git clone $REPO mpich-whitespace
-        cd mpich-whitespace
-        git config core.whitespace blank-at-eol,blank-at-eof,space-before-tab,tab-in-indent
-
-        git fetch origin
-        git checkout $1
-        git rebase --verbose --exec maint/hooks/pre-commit origin/main
-        popd
-    }
-
-    function mpich_spellcheck {
-        REPO=$PWD
-        pushd $HOME/work/pull_requests
-        if test -d mpich-spellcheck ; then
-            rm -rf mpich-spellcheck
-        fi
-        
-        echo git clone mpich-github mpich-spellcheck ...
-        git clone $REPO mpich-spellcheck
-        cd mpich-spellcheck
-
-        git fetch origin
-        git checkout $1
-        git rebase --verbose --exec maint/hooks/spellchecker origin/main
-        popd
-    }
-
-    function mpich_build {
-        git submodule update --init
-        time ./autogen.sh |tee autogen.log
-        # time ./configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda |tee c.txt
-        time ./configure --prefix=$PWD/_inst --enable-g=all --with-device=ch3 |tee c.txt
-        time make install |tee m.txt
-    }
-
-    function mpich_build_quick {
-        set -e
-        git submodule update --init
-        time ./autogen.sh -quick -with-ofi -with-yaksa -with-hydra -with-json -with-hwloc -yaksa-depth=2 |tee autogen.log
-        time ./configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda  --disable-cxx --disable-fortran --disable-romio |tee c.txt
-        time make install |tee m.txt
-    }
-
-    function mpich_build_vpath {
-        git submodule update --init
-        time ./autogen.sh |tee autogen.log
-        mkdir -p build
-        cd build
-        time ../configure --prefix=$PWD/_inst --enable-g=dbg --disable-shared --with-device=ch4:ofi --without-cuda |tee c.txt
-        time make install |tee m.txt
-    }
-
-    function vpath_build {
-        git submodule update --init
-        time ./autogen.sh
-        mkdir build && cd build
-        time ../configure --prefix=$PWD/_inst --with-device=ch4:ofi --without-cuda
-        time make install
     }
 
     complete -W 'MPICH3.2 MPICH3.3 MPI-fortran MPI-test OMPI4.0 share TOY' set_lib
