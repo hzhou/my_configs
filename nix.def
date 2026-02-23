@@ -48,7 +48,8 @@ page: win32.nix, basic_frame
 #---------------------------------------- 
 page: npm.nix, basic_frame
     output_dir: ./nix
-    pkgs: nodejs puppeteer-cli # atk libxkbcommon libgbm 
+    pkgs: nodejs
+    # puppeteer-cli atk libxkbcommon libgbm 
 
     $(if:0)
         GLIBC=/nix/store/wb6rhpznjfczwlwx23zmdrrw74bayxw4-glibc-2.42-47

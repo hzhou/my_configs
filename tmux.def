@@ -5,6 +5,9 @@ page: _tmux.conf
     skiprun: 1
 
     set -g prefix C-a
+    set -g default-terminal "screen-256color"
+    set -ga terminal-overrides ",xterm-256color:Tc"
+
     unbind C-b
     bind C-a send-prefix
 
