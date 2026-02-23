@@ -48,7 +48,14 @@ page: win32.nix, basic_frame
 #---------------------------------------- 
 page: npm.nix, basic_frame
     output_dir: ./nix
-    pkgs: nodejs
+    pkgs: nodejs puppeteer-cli # atk libxkbcommon libgbm 
+
+    $(if:0)
+        GLIBC=/nix/store/wb6rhpznjfczwlwx23zmdrrw74bayxw4-glibc-2.42-47
+        ATK=/nix/store/57p0pw4smcb0zpz7wbczrys3nzdsjg88-at-spi2-core-2.58.2
+        XKB=/nix/store/zmqws0ch2636qgg6f62ha2wbdaxw9qdc-libxkbcommon-1.11.0
+        GBM=/nix/store/3mvmm3kqf2as7h9m59wafdkxfvyhshlf-mesa-libgbm-25.1.0
+    export LD_LIBRARY_PATH=$ATK/lib:$XKB/lib:$GBM/lib
 
 #---------------------------------------- 
 
