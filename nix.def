@@ -45,6 +45,12 @@ page: win32.nix, basic_frame
     export WCC=x86_64-w64-mingw32-gcc
     alias wcc=$WCC
 
+page: doc.nix, basic_frame
+    output_dir: ./nix
+    pkgs: (ruby.withPackages (ps: with ps; [ asciidoctor rbs racc ]))
+
+    $call set_PS1, doc
+
 #---------------------------------------- 
 page: npm.nix, basic_frame
     output_dir: ./nix
