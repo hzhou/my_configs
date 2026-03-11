@@ -1,3 +1,5 @@
+include: site.def?
+
 macros:
     commit_hash: 6c5e707c6b5339359a9a9e215c5e66d6d802fd7a # 25.11 - 260210
 
@@ -57,6 +59,7 @@ page: python.nix, basic_frame
     pkgs: python3
 
     $call set_PS1, python
+    $call @python_site
 
 page: npm.nix, basic_frame
     output_dir: ./nix
