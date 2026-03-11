@@ -52,6 +52,12 @@ page: doc.nix, basic_frame
     $call set_PS1, doc
 
 #---------------------------------------- 
+page: python.nix, basic_frame
+    output_dir: ./nix
+    pkgs: python3
+
+    $call set_PS1, python
+
 page: npm.nix, basic_frame
     output_dir: ./nix
     pkgs: nodejs
