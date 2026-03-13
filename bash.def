@@ -9,15 +9,37 @@ page: _bashrc.none
     skiprun: 1
     $call basic
     $call mydef
-    $call mymake
     $call git
+    $call mpich
+    $call homepass
     $call @bash_site
 
-    subcode: temp
-        alias vipy='vim maint/local_python/binding_c.py'
-        alias vif08='vim maint/local_python/binding_f08.py'
-        alias vidoc='vim doc/developer_guide.md'
-        alias vipass="vim $HOME/docs/argonne.txt"
+subcode: homepass
+    function pass {
+        ssh home -C perl /home/hzhou/projects/scripts/out/pass.pl $*
+    }
+
+subcode: mpich
+    $call mymake
+    export ch4=src/mpid/ch4/src
+    export ofi=src/mpid/ch4/netmod/ofi
+    export ucx=src/mpid/ch4/netmod/ucx
+    export sock=src/mpid/ch4/netmod/sock
+    export shm=src/mpid/common/shm
+    export posix=src/mpid/ch4/shm/posix
+    export ipc=src/mpid/ch4/shm/ipc
+    export ch4am=src/mpid/ch4/generic/am
+    export iqueue=src/mpid/ch4/shm/posix/eager/iqueue
+    export genq=src/mpid/common/genq
+    export romio=src/mpi/romio
+
+    export f08py=maint/local_python/binding_f08.py
+    export f77py=maint/local_python/binding_f77.py
+    export f90py=maint/local_python/binding_f90.py
+
+    alias vipy='vim maint/local_python/binding_c.py'
+    alias vif08='vim maint/local_python/binding_f08.py'
+    alias vidoc='vim doc/developer_guide.md'
 
 subcode: basic
     unalias -a
@@ -89,22 +111,6 @@ subcode: mymake
     alias debug_cpi='MPIR_CVAR_DEBUG_SUMMARY=1 ./cpi'
 
     #---------------------------------------- 
-    export ch4=src/mpid/ch4/src
-    export ofi=src/mpid/ch4/netmod/ofi
-    export ucx=src/mpid/ch4/netmod/ucx
-    export sock=src/mpid/ch4/netmod/sock
-    export shm=src/mpid/common/shm
-    export posix=src/mpid/ch4/shm/posix
-    export ipc=src/mpid/ch4/shm/ipc
-    export ch4am=src/mpid/ch4/generic/am
-    export iqueue=src/mpid/ch4/shm/posix/eager/iqueue
-    export genq=src/mpid/common/genq
-    export romio=src/mpi/romio
-
-    export f08py=maint/local_python/binding_f08.py
-    export f77py=maint/local_python/binding_f77.py
-    export f90py=maint/local_python/binding_f90.py
-
     export dbglog="-mpich-dbg=file -mpich-dbg-level=verbose -mpich-dbg-filename=dbg%d@T-%t@.log"
 
     function set_lib {
@@ -624,8 +630,4 @@ subcode: barn
     function clearnotes {
     rm "$HOME/docs/_line_notes"
     touch "$HOME/docs/_line_notes"
-    }
-
-    function pass {
-        ssh home -C perl /home/hzhou/projects/scripts/out/pass.pl $*
     }
